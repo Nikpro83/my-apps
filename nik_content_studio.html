@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Студия контента — Ник</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600&family=Golos+Text:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #181818;
+    --bg3: #222222;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0ede8;
+    --text2: #888880;
+    --text3: #555550;
+    --accent: #e8d5a3;
+    --accent2: #c4a96b;
+    --accent-bg: rgba(232,213,163,0.08);
+    --user-bg: #e8d5a3;
+    --user-text: #1a1508;
+    --radius: 16px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Golos Text', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* API KEY SCREEN */
+  #api-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+  }
+  .api-card {
+    max-width: 440px;
+    width: 100%;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 36px;
+    background: var(--bg2);
+  }
+  .api-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .api-logo::before {
+    content: '';
+    display: block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .api-card h2 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .api-card p {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .api-card a { color: var(--accent); text-decoration: none; }
+  .api-card a:hover { text-decoration: underline; }
+
+  .field-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+  }
+  .api-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Golos Text', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .api-input:focus { border-color: var(--accent2); }
+  .api-input::placeholder { color: var(--text3); }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: var(--user-text);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 13px;
+    font-family: 'Golos Text', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .api-note {
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 14px;
+  }
+
+  /* MAIN APP */
+  #app { display: none; flex-direction: column; height: 100vh; }
+  #app.visible { display: flex; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+  .topbar-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.07em;
+  }
+  .topbar-sep { color: var(--text3); font-size: 12px; }
+  .topbar-mode { font-size: 13px; color: var(--text2); }
+  .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .btn-sm {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Golos Text', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-sm:hover { background: var(--bg3); color: var(--text); }
+
+  /* MODES */
+  .modes-bar {
+    display: flex;
+    gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--bg2);
+  }
+  .modes-bar::-webkit-scrollbar { display: none; }
+  .mode-btn {
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Golos Text', sans-serif;
+    transition: all 0.15s;
+  }
+  .mode-btn:hover { border-color: var(--border2); color: var(--text); }
+  .mode-btn.active {
+    background: var(--accent);
+    color: var(--user-text);
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .msg-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .msg-wrap.user { align-items: flex-end; }
+  .msg-wrap.ai { align-items: flex-start; }
+
+  .msg-meta {
+    font-size: 11px;
+    color: var(--text3);
+    padding: 0 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .msg-wrap.user .bubble {
+    background: var(--user-bg);
+    color: var(--user-text);
+    border-radius: var(--radius) var(--radius) 4px var(--radius);
+  }
+  .msg-wrap.ai .bubble {
+    background: var(--bg2);
+    color: var(--text);
+    border: 0.5px solid var(--border);
+    border-radius: 4px var(--radius) var(--radius) var(--radius);
+  }
+
+  .bubble strong { font-weight: 500; color: var(--accent); }
+  .bubble code {
+    background: var(--bg3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--accent2);
+  }
+  .bubble pre {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin: 8px 0;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    color: var(--text);
+  }
+
+  /* QUICK CHIPS */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .chip {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Golos Text', sans-serif;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .chip:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent2); }
+
+  /* TYPING */
+  .typing-wrap { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+  .typing-bubble {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 4px var(--radius) var(--radius) var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text3);
+    animation: blink 1.2s infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  /* INPUT */
+  .input-area {
+    padding: 14px 20px;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .msg-input {
+    flex: 1;
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'Golos Text', sans-serif;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    min-height: 44px;
+    max-height: 130px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  .msg-input:focus { border-color: var(--accent2); }
+  .msg-input::placeholder { color: var(--text3); }
+
+  .send-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  .send-btn:hover { opacity: 0.8; }
+  .send-btn:disabled { opacity: 0.4; cursor: default; }
+  .send-btn svg { fill: var(--user-text); }
+
+  /* COPY BUTTON */
+  .copy-btn {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    font-family: 'Golos Text', sans-serif;
+    margin-top: 4px;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--text2); border-color: var(--border2); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+  .empty-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .empty-state h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .empty-state p { font-size: 13px; }
+
+  .welcome-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  /* SCROLLBAR */
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- API KEY SCREEN -->
+<div id="api-screen">
+  <div class="api-card">
+    <div class="api-logo">СТУДИЯ КОНТЕНТА — НИК</div>
+    <h2>Введи API ключ Anthropic</h2>
+    <p>Ключ сохранится в браузере. Получить можно на <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys → Create Key.</p>
+    <div class="field-label">API KEY</div>
+    <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="btn-primary" onclick="saveKey()">Войти в студию →</button>
+    <div class="api-note">Ключ хранится только у тебя в браузере, никуда не отправляется</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-title">СТУДИЯ</div>
+    <div class="topbar-sep">·</div>
+    <div class="topbar-mode" id="modeLabel">Сценарий</div>
+    <div class="topbar-right">
+      <button class="btn-sm" onclick="clearChat()">Новый чат</button>
+      <button class="btn-sm" onclick="resetKey()">Сменить ключ</button>
+    </div>
+  </div>
+
+  <div class="modes-bar">
+    <button class="mode-btn active" onclick="setMode(this, 'scenario', 'Сценарий')">✦ Сценарий</button>
+    <button class="mode-btn" onclick="setMode(this, 'photo', 'Промпт для фото')">⬡ Фото-промпт</button>
+    <button class="mode-btn" onclick="setMode(this, 'video', 'Видео-промпт')">▷ Видео-промпт</button>
+    <button class="mode-btn" onclick="setMode(this, 'reels', 'Reels / Shorts')">⚡ Reels</button>
+    <button class="mode-btn" onclick="setMode(this, 'avito', 'Авито')">◈ Авито</button>
+    <button class="mode-btn" onclick="setMode(this, 'decor', 'Декор в аренду')">◇ Декор</button>
+    <button class="mode-btn" onclick="setMode(this, 'kids', 'Мастерская')">△ Мастерская</button>
+    <button class="mode-btn" onclick="setMode(this, 'family', 'Семья')">○ Семья</button>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">✦</div>
+      <h3>С чего начнём?</h3>
+      <p>Выбери режим вверху и опиши что хочешь создать</p>
+      <div class="welcome-chips">
+        <button class="chip" onclick="quickSend('Reels про букву с подсветкой — показываем как она работает на мероприятии')">Reels про букву с подсветкой</button>
+        <button class="chip" onclick="quickSend('Промпт для фото свадебной арки из цветов, вечернее освещение')">Фото свадебной арки</button>
+        <button class="chip" onclick="quickSend('Объявление на Авито: аренда декора для праздников в Краснодаре')">Объявление на Авито</button>
+        <button class="chip" onclick="quickSend('Сценарий видео для детской мастерской по деревообработке — дети делают скворечник')">Видео мастерской</button>
+        <button class="chip" onclick="quickSend('Промпт для видео: распаковка нового декора, атмосферно, тёплый свет')">Видео-промпт: декор</button>
+        <button class="chip" onclick="quickSend('Идеи для контента на неделю по декору в аренду')">Контент-план на неделю</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <textarea class="msg-input" id="msgInput" placeholder="Опиши что хочешь создать..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 16 16" width="16" height="16">
+        <path d="M1.5 1.5l13 6.5-13 6.5v-5l9-1.5-9-1.5z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+let currentMode = 'scenario';
+let history = [];
+let isLoading = false;
+let apiKey = '';
+
+const SYSTEM_PROMPTS = {
+  scenario: `Ты создаёшь сценарии для видео-контента. Ник из Краснодара — основатель стартапа по аренде декора (светящиеся буквы, арки, гирлянды) и педагог детской мастерской по деревообработке. Семья, ребёнок. Гараж = склад и мастерская. Платформы: ВКонтакте, Instagram, TikTok.
+
+Формат сценария:
+— Название и хронометраж
+— Хук (первые 3 сек)
+— Поэпизодно: таймкод · кадр · текст/реплика · звук
+— CTA в конце
+
+Отвечай по-русски, живо и конкретно.`,
+
+  photo: `Ты создаёшь промпты для генерации фото через AI (Midjourney, Stable Diffusion, Flux). Ник из Краснодара — стартап по аренде декора, детская мастерская.
+
+Формат ответа:
+**Промпт (EN):** [полный промпт на английском, детальный, 50-100 слов]
+**Негативный промпт (EN):** [что исключить]
+**Описание:** [что получится, на русском]
+**Рекомендации:** [соотношение сторон, стиль, модель]
+
+Промпты делай атмосферными, кинематографичными.`,
+
+  video: `Ты создаёшь промпты для AI-генерации видео (Higgsfield, Runway, Sora, Kling). Ник из Краснодара — стартап по аренде декора, детская мастерская.
+
+Формат:
+**Промпт для генерации (EN):** [детальный промпт]
+**Движение камеры:** [тип съёмки]
+**Настройки:** [длина, FPS, соотношение]
+**Раскадровка:** [3-5 ключевых момента]
+**Альтернативный промпт:** [вариация]`,
+
+  reels: `Ты пишешь сценарии Reels и Shorts (15-60 сек). Ник из Краснодара — стартап по аренде декора, детская мастерская. ВКонтакте, Instagram.
+
+Структура:
+⚡ **Хук** (0-3 сек): [что цепляет)
+📌 **Основа** (3-50 сек): [поэтапно]
+🎯 **CTA** (последние 5 сек): [призыв]
+🎵 **Музыка:** [рекомендация жанра/атмосферы]
+📝 **Текст на экране:** [ключевые надписи]
+
+Кратко, динамично, по-русски.`,
+
+  avito: `Ты пишешь объявления для Авито и промпты для фото товаров. Ник — аренда декора в Краснодаре (буквы, арки, гирлянды).
+
+Формат:
+**Заголовок объявления:** [до 50 символов]
+**Текст объявления:** [описание, преимущества, условия аренды]
+**Ключевые слова:** [для поиска]
+**Промпт для фото товара (EN):** [как красиво снять/сгенерировать фото]
+**Советы по оформлению:** [что улучшит объявление]`,
+
+  decor: `Ты помогаешь с контентом для стартапа по аренде декора. Ник из Краснодара — светящиеся буквы, арки, гирлянды, декор для свадеб, дней рождения, корпоративов. Работает из гаража.
+
+Помогаешь с: идеями контента, описаниями декора, промптами для съёмки/генерации, сценариями показа продукта, текстами для соцсетей.
+
+Отвечай конкретно, с вариантами. По-русски.`,
+
+  kids: `Ты создаёшь контент для детской мастерской по деревообработке. Ник — педагог, Краснодар.
+
+Помогаешь с: сценариями видео о занятиях, промптами для фото детского творчества, текстами для родителей, идеями для постов, описанием поделок.
+
+Тон: тёплый, вдохновляющий, безопасный. По-русски.`,
+
+  family: `Ты создаёшь тёплый семейный контент. Ник из Краснодара — семья, ребёнок, насыщенная жизнь.
+
+Помогаешь с: идеями для семейных фото/видео, промптами для съёмки моментов, сценариями воспоминаний, текстами. Не коммерческий — личный, живой контент.
+
+Тон: тёплый, искренний, без пафоса. По-русски.`
+};
+
+function saveKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-')) {
+    alert('Ключ должен начинаться с sk-ant-...');
+    return;
+  }
+  apiKey = key;
+  localStorage.setItem('nik_studio_key', key);
+  document.getElementById('api-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+}
+
+function resetKey() {
+  localStorage.removeItem('nik_studio_key');
+  apiKey = '';
+  document.getElementById('api-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+function setMode(btn, mode, label) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentMode = mode;
+  document.getElementById('modeLabel').textContent = label;
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 130) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function quickSend(text) {
+  document.getElementById('msgInput').value = text;
+  sendMessage();
+}
+
+function clearChat() {
+  history = [];
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = `<div class="empty-state" id="emptyState">
+    <div class="empty-icon">✦</div>
+    <h3>С чего начнём?</h3>
+    <p>Выбери режим вверху и опиши что хочешь создать</p>
+    <div class="welcome-chips">
+      <button class="chip" onclick="quickSend('Reels про букву с подсветкой — показываем как она работает на мероприятии')">Reels про букву с подсветкой</button>
+      <button class="chip" onclick="quickSend('Промпт для фото свадебной арки из цветов, вечернее освещение')">Фото свадебной арки</button>
+      <button class="chip" onclick="quickSend('Объявление на Авито: аренда декора для праздников в Краснодаре')">Объявление на Авито</button>
+      <button class="chip" onclick="quickSend('Сценарий видео для детской мастерской по деревообработке — дети делают скворечник')">Видео мастерской</button>
+    </div>
+  </div>`;
+}
+
+function addMessage(role, text) {
+  const empty = document.getElementById('emptyState');
+  if (empty) empty.remove();
+
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ' + role;
+
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.textContent = role === 'user' ? 'Ник' : 'Студия';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = formatText(text);
+
+  wrap.appendChild(meta);
+  wrap.appendChild(bubble);
+
+  if (role === 'ai') {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = 'Копировать';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text);
+      copyBtn.textContent = 'Скопировано ✓';
+      setTimeout(() => copyBtn.textContent = 'Копировать', 2000);
+    };
+    wrap.appendChild(copyBtn);
+  }
+
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function formatText(text) {
+  return text
+    .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'typing-wrap';
+  wrap.id = 'typing';
+  wrap.innerHTML = `<div class="msg-meta">Студия</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  addMessage('user', text);
+  history.push({ role: 'user', content: text });
+
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        system: SYSTEM_PROMPTS[currentMode],
+        messages: history
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'Ошибка API');
+    }
+
+    const data = await response.json();
+    const reply = data.content?.map(b => b.text || '').join('') || 'Пустой ответ';
+    history.push({ role: 'assistant', content: reply });
+
+    removeTyping();
+    addMessage('ai', reply);
+  } catch (err) {
+    removeTyping();
+    addMessage('ai', `⚠️ Ошибка: ${err.message}\n\nПроверь API ключ или попробуй ещё раз.`);
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// Init
+window.onload = () => {
+  const saved = localStorage.getItem('nik_studio_key');
+  if (saved) {
+    apiKey = saved;
+    document.getElementById('api-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Дневник</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ede7d9;
+  --bg3: #e4dccb;
+  --paper: #faf7f2;
+  --ink: #2c2416;
+  --ink2: #7a6e5f;
+  --ink3: #b0a490;
+  --accent: #8b5e3c;
+  --accent2: #c4895a;
+  --accent-light: #f0e6d8;
+  --ai-bg: #f0ebe0;
+  --user-bg: #2c2416;
+  --user-text: #faf7f2;
+  --border: rgba(44,36,22,0.1);
+  --border2: rgba(44,36,22,0.2);
+  --radius: 16px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* API SCREEN */
+#api-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 24px;
+}
+
+.api-card {
+  max-width: 400px;
+  width: 100%;
+  background: var(--paper);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 40px 36px;
+  position: relative;
+  z-index: 1;
+}
+
+.api-eyebrow {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.api-card h2 {
+  font-family: 'Lora', serif;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.api-card p {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.65;
+  margin-bottom: 28px;
+}
+
+.api-card a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent2); }
+
+.field-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.api-input {
+  width: 100%;
+  background: var(--bg);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  color: var(--ink);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+  margin-bottom: 16px;
+}
+.api-input:focus { border-color: var(--accent2); }
+.api-input::placeholder { color: var(--ink3); }
+
+.btn-enter {
+  width: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: .03em;
+  transition: opacity .15s;
+}
+.btn-enter:hover { opacity: .85; }
+
+.api-note {
+  font-size: 11px;
+  color: var(--ink3);
+  text-align: center;
+  margin-top: 14px;
+}
+
+/* MAIN APP */
+#app {
+  display: none;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+#app.visible { display: flex; }
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--paper);
+  flex-shrink: 0;
+}
+
+.header-left { display: flex; align-items: baseline; gap: 10px; }
+
+.header-title {
+  font-family: 'Lora', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.header-date {
+  font-size: 12px;
+  color: var(--ink3);
+}
+
+.header-right { display: flex; gap: 8px; }
+
+.btn-ghost {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border2);
+  background: transparent;
+  color: var(--ink2);
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  transition: all .15s;
+}
+.btn-ghost:hover { background: var(--bg2); color: var(--ink); }
+
+/* SIDEBAR + MAIN LAYOUT */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* SIDEBAR — past entries */
+.sidebar {
+  width: 220px;
+  border-right: 0.5px solid var(--border);
+  background: var(--bg2);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sidebar-head {
+  padding: 14px 16px 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.entries-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.entry-item {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .15s;
+  margin-bottom: 2px;
+}
+.entry-item:hover { background: var(--bg3); }
+.entry-item.active { background: var(--paper); }
+
+.entry-date {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.entry-preview {
+  font-size: 11px;
+  color: var(--ink3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-empty {
+  padding: 20px 16px;
+  font-size: 12px;
+  color: var(--ink3);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* CHAT AREA */
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+/* Date divider */
+.day-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+.day-divider span {
+  font-size: 11px;
+  color: var(--ink3);
+  white-space: nowrap;
+  font-style: italic;
+  font-family: 'Lora', serif;
+}
+.day-divider::before, .day-divider::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+
+/* Messages */
+.msg-wrap { display: flex; flex-direction: column; }
+.msg-wrap.user { align-items: flex-end; }
+.msg-wrap.ai { align-items: flex-start; }
+
+.msg-meta {
+  font-size: 10px;
+  color: var(--ink3);
+  margin-bottom: 4px;
+  padding: 0 4px;
+  font-family: 'Lora', serif;
+  font-style: italic;
+}
+
+.bubble {
+  max-width: 72%;
+  padding: 13px 18px;
+  border-radius: var(--radius);
+  line-height: 1.75;
+  font-size: 14px;
+}
+
+.msg-wrap.user .bubble {
+  background: var(--user-bg);
+  color: var(--user-text);
+  border-radius: var(--radius) var(--radius) 4px var(--radius);
+  font-family: 'Lora', serif;
+}
+
+.msg-wrap.ai .bubble {
+  background: var(--paper);
+  color: var(--ink);
+  border: 0.5px solid var(--border);
+  border-radius: 4px var(--radius) var(--radius) var(--radius);
+}
+
+.bubble em { font-style: italic; color: var(--ink2); }
+.bubble strong { font-weight: 500; color: var(--accent); }
+
+/* Mood tag */
+.mood-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+.mood-btn {
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border2);
+  background: var(--paper);
+  color: var(--ink2);
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  transition: all .15s;
+}
+.mood-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent2); }
+.mood-btn.selected { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+
+/* Typing */
+.typing-bubble {
+  background: var(--paper);
+  border: 0.5px solid var(--border);
+  border-radius: 4px var(--radius) var(--radius) var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ink3);
+  animation: blink 1.3s infinite;
+}
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+/* INPUT */
+.input-area {
+  padding: 16px 32px 20px;
+  border-top: 0.5px solid var(--border);
+  background: var(--paper);
+  flex-shrink: 0;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.msg-input {
+  flex: 1;
+  background: var(--bg);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 11px 16px;
+  color: var(--ink);
+  font-family: 'Lora', serif;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  min-height: 46px;
+  max-height: 140px;
+  line-height: 1.6;
+  transition: border-color .2s;
+}
+.msg-input:focus { border-color: var(--accent2); }
+.msg-input::placeholder { color: var(--ink3); font-style: italic; }
+
+.send-btn {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.send-btn:hover { opacity: .8; }
+.send-btn:disabled { opacity: .35; cursor: default; }
+.send-btn svg { fill: var(--paper); }
+
+.input-hint {
+  font-size: 11px;
+  color: var(--ink3);
+  margin-top: 8px;
+  font-style: italic;
+  font-family: 'Lora', serif;
+}
+
+/* Welcome state */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 40px;
+  text-align: center;
+}
+
+.welcome-icon {
+  font-size: 40px;
+  margin-bottom: 20px;
+  opacity: .5;
+}
+
+.welcome h3 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.welcome p {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.7;
+  max-width: 320px;
+  font-style: italic;
+}
+
+/* Save indicator */
+.save-badge {
+  font-size: 11px;
+  color: var(--ink3);
+  font-style: italic;
+  font-family: 'Lora', serif;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.save-badge.show { opacity: 1; }
+
+@media (max-width: 600px) {
+  .sidebar { display: none; }
+  .messages { padding: 20px 16px; }
+  .input-area { padding: 12px 16px 16px; }
+  .bubble { max-width: 90%; }
+}
+</style>
+</head>
+<body>
+
+<!-- API SCREEN -->
+<div id="api-screen">
+  <div class="api-card">
+    <div class="api-eyebrow">Личный дневник</div>
+    <h2>Добро пожаловать</h2>
+    <p>Это твоё пространство для осмысления дня. Пиши как есть — AI задаст вопросы и поможет разобраться.<br><br>Нужен API ключ Anthropic: <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</p>
+    <div class="field-label">API Key</div>
+    <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="btn-enter" onclick="saveKey()">Открыть дневник</button>
+    <div class="api-note">Ключ хранится только в твоём браузере</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-title">Дневник</div>
+      <div class="header-date" id="headerDate"></div>
+    </div>
+    <div class="header-right">
+      <span class="save-badge" id="saveBadge">сохранено</span>
+      <button class="btn-ghost" onclick="newEntry()">+ Новая запись</button>
+      <button class="btn-ghost" onclick="resetKey()">Сменить ключ</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-head">Записи</div>
+      <div class="entries-list" id="entriesList">
+        <div class="sidebar-empty">Здесь появятся твои записи</div>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div class="messages" id="messages">
+        <div class="welcome" id="welcomeState">
+          <div class="welcome-icon">✦</div>
+          <h3>Как прошёл твой день?</h3>
+          <p>Напиши всё что на душе — без фильтров. Я буду рядом, задам вопросы и помогу увидеть больше.</p>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="mood-row" id="moodRow">
+          <button class="mood-btn" onclick="selectMood(this, '😌 спокойно')">😌 спокойно</button>
+          <button class="mood-btn" onclick="selectMood(this, '😊 хорошо')">😊 хорошо</button>
+          <button class="mood-btn" onclick="selectMood(this, '😔 грустно')">😔 грустно</button>
+          <button class="mood-btn" onclick="selectMood(this, '😤 устал')">😤 устал</button>
+          <button class="mood-btn" onclick="selectMood(this, '🔥 энергично')">🔥 энергично</button>
+          <button class="mood-btn" onclick="selectMood(this, '😰 тревожно')">😰 тревожно</button>
+        </div>
+        <div class="input-row">
+          <textarea class="msg-input" id="msgInput"
+            placeholder="Расскажи как прошёл день..."
+            rows="1"
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <svg viewBox="0 0 16 16" width="15" height="15"><path d="M1.5 1.5l13 6.5-13 6.5v-5l9-1.5-9-1.5z"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">Enter — отправить · Shift+Enter — новая строка</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let apiKey = '';
+let history = [];
+let entries = {};
+let currentEntryId = null;
+let selectedMood = '';
+let isLoading = false;
+let isFirstMessage = true;
+
+const SYSTEM = `Ты — тёплый, внимательный собеседник-дневник. Твоя задача: помочь человеку осмыслить прожитый день через мягкий диалог.
+
+Правила:
+— Задавай только ОДИН вопрос за раз. Никогда не задавай несколько вопросов сразу.
+— Вопросы должны быть конкретными и тёплыми, не абстрактными.
+— Сначала признай то, что написал человек — покажи что ты услышал.
+— Помогай замечать паттерны, ценности, чувства — но ненавязчиво.
+— Иногда отражай — перефразируй сказанное, чтобы человек увидел себя со стороны.
+— Не давай советов если не просят. Твоя роль — помочь ОСМЫСЛИТЬ, а не исправить.
+— Раз в 3-4 обмена — предложи небольшое резюме того, что удалось понять за этот разговор.
+— Пиши кратко. Максимум 3-4 предложения + один вопрос.
+— Язык: тёплый, живой, русский. Без пафоса и шаблонных фраз типа "конечно!" или "отличный вопрос!".
+— Обращайся на "ты".`;
+
+function saveKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k.startsWith('sk-')) { alert('Ключ должен начинаться с sk-ant-...'); return; }
+  apiKey = k;
+  localStorage.setItem('diary_api_key', k);
+  init();
+}
+
+function resetKey() {
+  localStorage.removeItem('diary_api_key');
+  apiKey = '';
+  document.getElementById('api-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+function init() {
+  document.getElementById('api-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  updateDate();
+  loadEntries();
+  renderSidebar();
+}
+
+function updateDate() {
+  const now = new Date();
+  const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+  document.getElementById('headerDate').textContent = now.toLocaleDateString('ru-RU', opts);
+}
+
+function loadEntries() {
+  const saved = localStorage.getItem('diary_entries');
+  entries = saved ? JSON.parse(saved) : {};
+}
+
+function saveEntries() {
+  localStorage.setItem('diary_entries', JSON.stringify(entries));
+  const badge = document.getElementById('saveBadge');
+  badge.classList.add('show');
+  setTimeout(() => badge.classList.remove('show'), 2000);
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function renderSidebar() {
+  const list = document.getElementById('entriesList');
+  const keys = Object.keys(entries).sort().reverse();
+  if (keys.length === 0) {
+    list.innerHTML = '<div class="sidebar-empty">Здесь появятся твои записи</div>';
+    return;
+  }
+  list.innerHTML = keys.map(k => {
+    const e = entries[k];
+    const preview = e.messages && e.messages.length > 0 ? e.messages[0].content.slice(0, 45) + '…' : '—';
+    const active = k === currentEntryId ? ' active' : '';
+    const d = new Date(k);
+    const label = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', weekday: 'short' });
+    return `<div class="entry-item${active}" onclick="loadEntry('${k}')">
+      <div class="entry-date">${label}${e.mood ? ' · ' + e.mood : ''}</div>
+      <div class="entry-preview">${preview}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadEntry(key) {
+  currentEntryId = key;
+  const e = entries[key];
+  history = e.messages ? [...e.messages] : [];
+  selectedMood = e.mood || '';
+  isFirstMessage = history.length === 0;
+
+  document.querySelectorAll('.mood-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent.trim() === selectedMood);
+  });
+
+  renderMessages();
+  renderSidebar();
+}
+
+function newEntry() {
+  currentEntryId = null;
+  history = [];
+  selectedMood = '';
+  isFirstMessage = true;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = `<div class="welcome" id="welcomeState">
+    <div class="welcome-icon">✦</div>
+    <h3>Как прошёл твой день?</h3>
+    <p>Напиши всё что на душе — без фильтров. Я буду рядом, задам вопросы и помогу увидеть больше.</p>
+  </div>`;
+  renderSidebar();
+}
+
+function selectMood(btn, mood) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  if (selectedMood === mood) { selectedMood = ''; return; }
+  btn.classList.add('selected');
+  selectedMood = mood;
+  if (currentEntryId && entries[currentEntryId]) {
+    entries[currentEntryId].mood = mood;
+    saveEntries();
+  }
+}
+
+function renderMessages() {
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+
+  if (history.length === 0) {
+    msgs.innerHTML = `<div class="welcome" id="welcomeState">
+      <div class="welcome-icon">✦</div>
+      <h3>Как прошёл твой день?</h3>
+      <p>Напиши всё что на душе — без фильтров.</p>
+    </div>`;
+    return;
+  }
+
+  // Date divider
+  const dateDiv = document.createElement('div');
+  dateDiv.className = 'day-divider';
+  const key = currentEntryId || todayKey();
+  const d = new Date(key);
+  dateDiv.innerHTML = `<span>${d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</span>`;
+  msgs.appendChild(dateDiv);
+
+  history.forEach(m => addBubble(m.role, m.content, false));
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addBubble(role, text, scroll = true) {
+  const welcome = document.getElementById('welcomeState');
+  if (welcome) welcome.remove();
+
+  const msgs = document.getElementById('messages');
+
+  // Add divider if first message
+  if (history.length <= 1 && role === 'user') {
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'day-divider';
+    const d = new Date();
+    dateDiv.innerHTML = `<span>${d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</span>`;
+    msgs.appendChild(dateDiv);
+  }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ' + (role === 'user' ? 'user' : 'ai');
+
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.textContent = role === 'user' ? 'Ты' : 'Дневник';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = formatText(text);
+
+  wrap.appendChild(meta);
+  wrap.appendChild(bubble);
+  msgs.appendChild(wrap);
+
+  if (scroll) msgs.scrollTop = msgs.scrollHeight;
+}
+
+function formatText(t) {
+  return t
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ai';
+  wrap.id = 'typing';
+  wrap.innerHTML = `<div class="msg-meta">Дневник</div><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Init entry
+  if (!currentEntryId) {
+    currentEntryId = todayKey();
+    if (!entries[currentEntryId]) {
+      entries[currentEntryId] = { messages: [], mood: selectedMood };
+    }
+  }
+
+  // Add to history & render
+  const userMsg = { role: 'user', content: text };
+  history.push(userMsg);
+  entries[currentEntryId].messages = [...history];
+  entries[currentEntryId].mood = selectedMood;
+  saveEntries();
+  addBubble('user', text);
+  renderSidebar();
+
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  // Build messages with optional mood context
+  let msgs = [...history];
+  if (isFirstMessage && selectedMood) {
+    msgs = [{ role: 'user', content: `[Настроение сегодня: ${selectedMood}]\n\n${text}` }, ...history.slice(1)];
+  }
+  isFirstMessage = false;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        system: SYSTEM,
+        messages: msgs
+      })
+    });
+
+    if (!res.ok) throw new Error((await res.json()).error?.message || 'Ошибка API');
+
+    const data = await res.json();
+    const reply = data.content?.map(b => b.text || '').join('') || '...';
+
+    history.push({ role: 'assistant', content: reply });
+    entries[currentEntryId].messages = [...history];
+    saveEntries();
+
+    removeTyping();
+    addBubble('ai', reply);
+    renderSidebar();
+  } catch (err) {
+    removeTyping();
+    addBubble('ai', `Что-то пошло не так: ${err.message}`);
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// Boot
+window.onload = () => {
+  const k = localStorage.getItem('diary_api_key');
+  if (k) { apiKey = k; init(); }
+};
+</script>
+</body>
+</html>
