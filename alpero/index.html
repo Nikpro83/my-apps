@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpero — AI-специалист | Николай Погудин</title>
+<meta name="description" content="AI-специалист с 20-летним опытом в рекламе. Создаю визуальный контент, рендеры, видео и автоматизирую бизнес-процессы с помощью ИИ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080F;
+  --bg2: #0C0F1A;
+  --bg3: #111527;
+  --indigo: #6366F1;
+  --indigo-light: #818CF8;
+  --indigo-pale: #A78BFA;
+  --violet: #7C3AED;
+  --text: #E8EAF0;
+  --text-muted: rgba(232,234,240,0.45);
+  --text-dim: rgba(232,234,240,0.25);
+  --border: rgba(255,255,255,0.07);
+  --border-indigo: rgba(99,102,241,0.25);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* TYPOGRAPHY */
+.display { font-family: 'Syne', sans-serif; font-weight: 800; }
+.label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--indigo-light);
+  font-weight: 600;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--indigo), var(--violet));
+  color: #fff;
+}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-outline {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  background: rgba(6,8,15,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #fff;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-links a {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  padding: 9px 20px;
+  font-size: 13px;
+}
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+}
+.hero-glow-1 {
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+}
+.hero-glow-2 {
+  position: absolute;
+  bottom: -10%;
+  left: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%);
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(99,102,241,0.1);
+  border: 1px solid var(--border-indigo);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--indigo-pale);
+  margin-bottom: 32px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--indigo);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(99,102,241,0); }
+}
+.hero h1 {
+  font-size: clamp(40px, 6vw, 68px);
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: #fff;
+  margin-bottom: 24px;
+}
+.hero h1 .grad {
+  background: linear-gradient(135deg, #818CF8 0%, #A78BFA 50%, #C4B5FD 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: 17px;
+  color: var(--text-muted);
+  max-width: 480px;
+  line-height: 1.75;
+  margin-bottom: 40px;
+}
+.hero-btns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.hero-scroll {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 2;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--indigo), transparent);
+}
+
+/* STATS */
+.stats-section {
+  padding: 0 48px 80px;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.stat-item {
+  background: var(--bg2);
+  padding: 32px;
+  text-align: center;
+  transition: background 0.2s;
+}
+.stat-item:hover { background: var(--bg3); }
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 42px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #818CF8, #C4B5FD);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* SECTIONS */
+section {
+  padding: 80px 48px;
+}
+.section-header {
+  margin-bottom: 48px;
+}
+.section-header h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -1px;
+  color: #fff;
+  margin-top: 10px;
+}
+
+/* SERVICES */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.service-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.service-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99,102,241,0.06), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.service-card:hover {
+  border-color: var(--border-indigo);
+  transform: translateY(-2px);
+}
+.service-card:hover::before { opacity: 1; }
+.service-num {
+  font-size: 11px;
+  color: var(--indigo-light);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+.service-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.service-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.service-soon {
+  display: inline-block;
+  font-size: 10px;
+  background: rgba(99,102,241,0.12);
+  color: var(--indigo-light);
+  border: 1px solid rgba(99,102,241,0.2);
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-top: 10px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* HOW IT WORKS */
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.how-step {
+  padding: 36px 32px;
+  border-right: 1px solid var(--border);
+  background: var(--bg2);
+  position: relative;
+}
+.how-step:last-child { border-right: none; }
+.step-n {
+  font-family: 'Syne', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(167,139,250,0.15));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+.how-step h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.how-step p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ABOUT */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 60px;
+  align-items: center;
+}
+.about-photo {
+  position: relative;
+}
+.about-photo img {
+  width: 100%;
+  border-radius: 20px;
+  filter: grayscale(20%);
+}
+.about-photo-frame {
+  position: absolute;
+  inset: -8px;
+  border: 1px solid var(--border-indigo);
+  border-radius: 24px;
+  pointer-events: none;
+}
+.about-photo-glow {
+  position: absolute;
+  top: 20%;
+  left: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(99,102,241,0.15), transparent 70%);
+  pointer-events: none;
+}
+.about-content h2 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  color: #fff;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+.about-content p {
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.about-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+}
+.tag {
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.18);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 12px;
+  color: var(--indigo-pale);
+  font-weight: 500;
+}
+
+/* CTA */
+.cta-section {
+  padding: 0 48px 80px;
+}
+.cta-inner {
+  background: var(--bg2);
+  border: 1px solid var(--border-indigo);
+  border-radius: 20px;
+  padding: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.cta-glow {
+  position: absolute;
+  right: -100px;
+  top: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99,102,241,0.1), transparent 70%);
+  pointer-events: none;
+}
+.cta-inner h2 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.cta-inner p {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.cta-btns {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: #fff;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+.footer-links a {
+  font-size: 13px;
+  color: var(--text-dim);
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--text-muted); }
+.footer-copy {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ANIMATIONS */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; }
+  .stats-section { padding: 0 20px 60px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  section { padding: 60px 20px; }
+  .services-grid { grid-template-columns: 1fr; }
+  .how-grid { grid-template-columns: 1fr; }
+  .how-step { border-right: none; border-bottom: 1px solid var(--border); }
+  .how-step:last-child { border-bottom: none; }
+  .about-grid { grid-template-columns: 1fr; gap: 32px; }
+  .cta-inner { flex-direction: column; padding: 36px 24px; text-align: center; }
+  .cta-btns { flex-direction: column; width: 100%; }
+  .cta-btns .btn { justify-content: center; }
+  footer { flex-direction: column; gap: 20px; text-align: center; }
+  .footer-links { flex-wrap: wrap; justify-content: center; }
+}
+
+/* LOGO SVG inline */
+.logo-svg { width: 32px; height: 32px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <img src="logo.jpg" alt="Alpero" style="height:36px;width:auto;filter:invert(1);">
+  </div>
+  <div class="nav-links">
+    <a href="#services">Услуги</a>
+    <a href="#how">Как работаю</a>
+    <a href="#about">Обо мне</a>
+    <a href="#contact">Контакты</a>
+  </div>
+  <a href="https://t.me/Nikolai_Pogudin" target="_blank" class="btn btn-primary nav-cta">Написать →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="badge-dot"></span>AI-специалист · Краснодар</div>
+    <h1 class="display">
+      Визуальный контент<br>
+      нового уровня<br>
+      с помощью <span class="grad">искусственного<br>интеллекта</span>
+    </h1>
+    <p class="hero-sub">20 лет в рекламе и маркетинге. Создаю продающие визуалы, рендеры, видео и автоматизирую бизнес-процессы.</p>
+    <div class="hero-btns">
+      <a href="https://t.me/Nikolai_Pogudin" target="_blank" class="btn btn-primary">Написать в Telegram →</a>
+      <a href="#services" class="btn btn-outline">Смотреть услуги</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-section fade-in">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-num">20+</div>
+      <div class="stat-label">лет в рекламе и маркетинге</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">9</div>
+      <div class="stat-label">направлений AI-услуг</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">15+</div>
+      <div class="stat-label">AI-инструментов в работе</div>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header fade-in">
+    <div class="label">Что я делаю</div>
+    <h2 class="display">Направления</h2>
+  </div>
+  <div class="services-grid">
+    <div class="service-card fade-in">
+      <div class="service-num">01</div>
+      <h3>AI-аватары</h3>
+      <p>Профессиональные портреты, аватары спикеров и замена лица. Для соцсетей, презентаций, корпоративных материалов.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">02</div>
+      <h3>Карточки товаров / Lookbook</h3>
+      <p>Продающие карточки для e-commerce без фотостудии. Товар в любом интерьере, на любом фоне, в любом стиле.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">03</div>
+      <h3>Реставрация и ретушь фото</h3>
+      <p>Восстановление старых и повреждённых снимков. Апскейл, улучшение качества, колоризация.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">04</div>
+      <h3>Архитектура / 3D рендеры</h3>
+      <p>Визуализация жилых комплексов, интерьеров, фасадов. Быстро и дешевле классического 3D.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">05</div>
+      <h3>Анимация и генерация видео</h3>
+      <p>AI-видеоролики, анимированные презентации, рекламные клипы на основе нейросетей.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">06</div>
+      <h3>Голосовое клонирование / Музыка</h3>
+      <p>Озвучка материалов голосом диктора, создание уникальной музыки для видео и рекламы.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">07</div>
+      <h3>Обучение ИИ и промпты</h3>
+      <p>Индивидуальное обучение работе с AI-инструментами. Разработка промптов под задачи бизнеса.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">08</div>
+      <h3>Визуализация литературы</h3>
+      <p>Иллюстрации к книгам, сценариям, концепт-арт для издательств и авторов.</p>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">09</div>
+      <h3>Автоматизация бизнес-процессов</h3>
+      <p>Создание AI-систем, мини-приложений и инструментов автоматизации под задачи вашего бизнеса.</p>
+      <span class="service-soon">скоро</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="padding-top:0">
+  <div class="section-header fade-in">
+    <div class="label">Процесс</div>
+    <h2 class="display">Как я работаю</h2>
+  </div>
+  <div class="how-grid fade-in">
+    <div class="how-step">
+      <div class="step-n">01</div>
+      <h3>Вы описываете задачу</h3>
+      <p>Пишете в Telegram или через форму. Я задаю уточняющие вопросы и предлагаю оптимальный подход.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-n">02</div>
+      <h3>Делаю первые варианты</h3>
+      <p>Обычно в течение 24 часов. Показываю результат, обсуждаем, правим до вашего одобрения.</p>
+    </div>
+    <div class="how-step">
+      <div class="step-n">03</div>
+      <h3>Вы получаете результат</h3>
+      <p>Готовые файлы в нужных форматах. Оплата после согласования финального варианта.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-photo fade-in">
+      <img src="photo.jpg" alt="Николай Погудин — AI-специалист" onerror="this.style.background='rgba(99,102,241,0.1)';this.style.minHeight='400px';this.style.borderRadius='20px'">
+      <div class="about-photo-frame"></div>
+      <div class="about-photo-glow"></div>
+    </div>
+    <div class="about-content fade-in">
+      <div class="label">Обо мне</div>
+      <h2 class="display">Николай Погудин</h2>
+      <p>AI-специалист с 20-летним опытом в рекламе и маркетинге. Работал с производством рекламных материалов, ивентами, выставками, запуском продуктов.</p>
+      <p>ИИ — мой основной инструмент последнего года. Я не просто использую нейросети — я строю на их основе рабочие системы для бизнеса. Постоянно тестирую новые возможности и знаю что реально работает.</p>
+      <p>Владею 15+ AI-инструментами: Higgsfield, ElevenLabs, Suno, Midjourney и другими.</p>
+      <div class="about-tags">
+        <span class="tag">Higgsfield</span>
+        <span class="tag">Midjourney</span>
+        <span class="tag">ElevenLabs</span>
+        <span class="tag">Suno</span>
+        <span class="tag">Claude</span>
+        <span class="tag">Runway</span>
+        <span class="tag">Kling</span>
+        <span class="tag">Flux</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section fade-in" id="contact">
+  <div class="cta-inner">
+    <div class="cta-glow"></div>
+    <div>
+      <h2 class="display">Есть задача?<br>Обсудим.</h2>
+      <p>Отвечаю быстро — разберёмся что нужно именно вам</p>
+    </div>
+    <div class="cta-btns">
+      <a href="https://t.me/Nikolai_Pogudin" target="_blank" class="btn btn-primary">Написать в Telegram →</a>
+      <a href="mailto:nikolajpogudin2189@gmail.com" class="btn btn-outline">Написать на почту</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="logo.jpg" alt="Alpero" style="height:28px;width:auto;filter:invert(1);opacity:0.7;">
+  </div>
+  <div class="footer-links">
+    <a href="#services">Услуги</a>
+    <a href="#how">Процесс</a>
+    <a href="#about">Обо мне</a>
+    <a href="https://t.me/persistenceai" target="_blank">Telegram-канал</a>
+  </div>
+  <div class="footer-copy">© 2025 Alpero · Николай Погудин</div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
