@@ -771,5 +771,48 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 </script>
+<section id="calculator" style="padding: 60px 20px; background: #0f172a; display: flex; justify-content: center;">
+    <div style="width: 100%; max-width: 500px; background: #1e293b; padding: 30px; border-radius: 24px; border: 1px solid #6366f1; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
+        
+        <h2 style="font-family: 'Syne', sans-serif; color: #6366f1; margin-bottom: 10px; font-size: 28px;">AI Price Calc</h2>
+        <p style="font-family: 'Manrope', sans-serif; color: #94a3b8; margin-bottom: 30px;">Рассчитайте стоимость генерации видео-аватара</p>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; color: #f1f5f9; margin-bottom: 10px; font-family: 'Manrope', sans-serif;">Длительность: <span id="displayDuration" style="color: #6366f1; font-weight: bold;">10</span> сек.</label>
+            <input type="range" id="durationRange" min="1" max="180" value="10" style="width: 100%; accent-color: #6366f1; cursor: pointer;">
+        </div>
+
+        <div style="background: #0f172a; padding: 20px; border-radius: 16px; text-align: center; border: 1px dashed #334155;">
+            <span style="color: #94a3b8; font-size: 14px; display: block; margin-bottom: 5px;">Итого к оплате:</span>
+            <span id="totalPrice" style="font-family: 'Syne', sans-serif; font-size: 36px; color: #fff; font-weight: bold;">600</span>
+            <span style="color: #6366f1; font-size: 24px; font-weight: bold;"> ₽</span>
+        </div>
+
+        <button onclick="sendToTelegram()" style="width: 100%; margin-top: 25px; background: #6366f1; color: white; border: none; padding: 16px; border-radius: 12px; font-family: 'Manrope', sans-serif; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px;">
+            Забронировать генерацию
+        </button>
+    </div>
+</section>
+
+<script>
+    // Логика калькулятора
+    const range = document.getElementById('durationRange');
+    const displayDur = document.getElementById('displayDuration');
+    const displayPrice = document.getElementById('totalPrice');
+    const pricePerSec = 60;
+
+    range.addEventListener('input', (e) => {
+        const val = e.target.value;
+        displayDur.innerText = val;
+        displayPrice.innerText = (val * pricePerSec).toLocaleString('ru-RU');
+    });
+
+    // Функция-заглушка для связи (Backend-имитация)
+    function sendToTelegram() {
+        const finalVal = range.value;
+        const finalPrice = finalVal * pricePerSec;
+        alert(`Заявка на аватар (${finalVal} сек.) принята! К оплате: ${finalPrice} руб. В следующем уроке подключим реальную отправку!`);
+    }
+</script>
 </body>
 </html>
