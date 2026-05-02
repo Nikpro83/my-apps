@@ -722,6 +722,98 @@ footer {
   </div>
 </section>
 
+<!-- CALCULATOR -->
+<section id="calculator" style="padding:80px 48px;">
+  <div style="max-width:520px;margin:0 auto;background:#0C0F1A;padding:40px;border-radius:24px;border:1px solid rgba(99,102,241,0.35);box-shadow:0 20px 40px rgba(0,0,0,0.4);">
+    <div class="label" style="margin-bottom:8px;">Калькулятор</div>
+    <h2 class="display" style="font-size:28px;color:#fff;margin-bottom:8px;">AI Price Calc</h2>
+    <p style="color:var(--text-muted);margin-bottom:32px;font-size:14px;">Рассчитайте стоимость и оставьте заявку</p>
+
+    <div style="margin-bottom:24px;">
+      <label style="display:block;color:var(--text);margin-bottom:10px;font-size:14px;">
+        Длительность: <span id="displayDuration" style="color:var(--indigo-light);font-weight:700;">10</span> сек.
+      </label>
+      <input type="range" min="1" max="180" value="10" id="durationRange"
+        style="width:100%;accent-color:#6366F1;cursor:pointer;height:6px;">
+    </div>
+
+    <div style="background:#06080F;padding:24px;border-radius:16px;text-align:center;border:1px dashed rgba(255,255,255,0.1);margin-bottom:28px;">
+      <span style="color:var(--text-muted);font-size:13px;display:block;margin-bottom:6px;">Итого к оплате:</span>
+      <span id="totalPrice" style="font-family:'Syne',sans-serif;font-size:42px;color:#fff;font-weight:800;letter-spacing:-1px;">600</span>
+      <span style="color:var(--indigo-light);font-size:28px;font-weight:700;"> ₽</span>
+    </div>
+
+    <form id="calcForm">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;color:var(--text);margin-bottom:8px;font-size:14px;">Ваш телефон:</label>
+        <input type="tel" id="phoneInput" placeholder="+7 (___) ___-__-__" required
+          style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:#06080F;color:#fff;font-family:'Manrope',sans-serif;font-size:15px;outline:none;transition:border 0.2s;"
+          onfocus="this.style.borderColor='rgba(99,102,241,0.5)'"
+          onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button type="submit" id="calcBtn"
+        style="width:100%;background:linear-gradient(135deg,#6366F1,#7C3AED);color:#fff;border:none;padding:16px;border-radius:12px;font-family:'Manrope',sans-serif;font-weight:700;cursor:pointer;font-size:15px;transition:opacity 0.2s;">
+        Заказать генерацию →
+      </button>
+      <div id="calcMsg" style="display:none;margin-top:16px;padding:14px;border-radius:12px;text-align:center;font-size:14px;"></div>
+    </form>
+  </div>
+</section>
+
+<script>
+(function() {
+  const range = document.getElementById('durationRange');
+  const displayDur = document.getElementById('displayDuration');
+  const displayPrice = document.getElementById('totalPrice');
+  const pricePerSec = 60;
+
+  range.addEventListener('input', function() {
+    const val = parseInt(this.value);
+    displayDur.textContent = val;
+    displayPrice.textContent = (val * pricePerSec).toLocaleString('ru-RU');
+  });
+
+  document.getElementById('calcForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const phone = document.getElementById('phoneInput').value.trim();
+    const seconds = range.value;
+    const price = parseInt(seconds) * pricePerSec;
+    const btn = document.getElementById('calcBtn');
+    const msg = document.getElementById('calcMsg');
+
+    btn.disabled = true;
+    btn.textContent = 'Отправляю...';
+
+    try {
+      const res = await fetch('https://formspree.io/f/mbdwddja', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ Phone: phone, Seconds: seconds, Total_Price: price + ' ₽' })
+      });
+      if (res.ok) {
+        msg.style.display = 'block';
+        msg.style.background = 'rgba(99,102,241,0.1)';
+        msg.style.border = '1px solid rgba(99,102,241,0.3)';
+        msg.style.color = '#818CF8';
+        msg.textContent = '✓ Заявка отправлена! Свяжусь с вами в ближайшее время.';
+        btn.textContent = 'Отправлено ✓';
+        btn.style.opacity = '0.5';
+      } else {
+        throw new Error();
+      }
+    } catch {
+      msg.style.display = 'block';
+      msg.style.background = 'rgba(239,68,68,0.1)';
+      msg.style.border = '1px solid rgba(239,68,68,0.3)';
+      msg.style.color = '#F87171';
+      msg.textContent = '✗ Ошибка отправки. Напишите напрямую в Telegram.';
+      btn.disabled = false;
+      btn.textContent = 'Заказать генерацию →';
+    }
+  });
+})();
+</script>
+
 <!-- CTA -->
 <div class="cta-section fade-in" id="contact">
   <div class="cta-inner">
@@ -770,83 +862,6 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
-</script>
-<section id="calculator" style="padding: 60px 20px; background: #0f172a; display: flex; justify-content: center;">
-    <div style="width: 100%; max-width: 500px; background: #1e293b; padding: 30px; border-radius: 24px; border: 1px solid #6366f1; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
-        
-        <h2 style="font-family: 'Syne', sans-serif; color: #6366f1; margin-bottom: 10px; font-size: 28px;">AI Price Calc</h2>
-        <p style="font-family: 'Manrope', sans-serif; color: #94a3b8; margin-bottom: 30px;">Рассчитайте стоимость генерации видео-аватара</p>
-
-        <div style="margin-bottom: 25px;">
-            <label style="display: block; color: #f1f5f9; margin-bottom: 10px; font-family: 'Manrope', sans-serif;">Длительность: <span id="displayDuration" style="color: #6366f1; font-weight: bold;">10</span> сек.</label>
-            <input type="range" id="durationRange" min="1" max="180" value="10" style="width: 100%; accent-color: #6366f1; cursor: pointer;">
-        </div>
-
-        <div style="background: #0f172a; padding: 20px; border-radius: 16px; text-align: center; border: 1px dashed #334155;">
-            <span style="color: #94a3b8; font-size: 14px; display: block; margin-bottom: 5px;">Итого к оплате:</span>
-            <span id="totalPrice" style="font-family: 'Syne', sans-serif; font-size: 36px; color: #fff; font-weight: bold;">600</span>
-            <span style="color: #6366f1; font-size: 24px; font-weight: bold;"> ₽</span>
-        </div>
-
-        <button onclick="sendToTelegram()" style="width: 100%; margin-top: 25px; background: #6366f1; color: white; border: none; padding: 16px; border-radius: 12px; font-family: 'Manrope', sans-serif; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px;">
-            Забронировать генерацию
-        </button>
-    </div>
-</section>
-
-<script>
-<section id="calculator" style="padding: 60px 20px; background: #0f172a; display: flex; justify-content: center;">
-    <form action="https://formspree.io/f/mbdwddja" method="POST" style="width: 100%; max-width: 500px; background: #1e293b; padding: 30px; border-radius: 24px; border: 1px solid #6366f1; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
-        
-        <h2 style="font-family: 'Syne', sans-serif; color: #6366f1; margin-bottom: 10px; font-size: 28px;">AI Price Calc</h2>
-        <p style="font-family: 'Manrope', sans-serif; color: #94a3b8; margin-bottom: 30px;">Рассчитайте стоимость и оставьте заявку</p>
-
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; color: #f1f5f9; margin-bottom: 10px; font-family: 'Manrope', sans-serif;">
-                Длительность: <span id="displayDuration" style="color: #6366f1; font-weight: bold;">10</span> сек.
-            </label>
-            <input type="hidden" name="Seconds" id="hiddenSeconds" value="10">
-            <input type="range" min="1" max="180" value="10" id="durationRange" style="width: 100%; accent-color: #6366f1; cursor: pointer;">
-        </div>
-
-        <div style="background: #0f172a; padding: 20px; border-radius: 16px; text-align: center; border: 1px dashed #334155; margin-bottom: 25px;">
-            <span style="color: #94a3b8; font-size: 14px; display: block; margin-bottom: 5px;">Итого к оплате:</span>
-            <input type="hidden" name="Total_Price" id="hiddenPrice" value="600">
-            <span id="totalPrice" style="font-family: 'Syne', sans-serif; font-size: 36px; color: #fff; font-weight: bold;">600</span>
-            <span style="color: #6366f1; font-size: 24px; font-weight: bold;"> ₽</span>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; color: #f1f5f9; margin-bottom: 10px; font-family: 'Manrope', sans-serif;">Ваш телефон:</label>
-            <input type="tel" name="Phone" placeholder="+7 (___) ___-__-__" required style="width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; outline: none; font-family: 'Manrope', sans-serif;">
-        </div>
-
-        <button type="submit" style="width: 100%; background: #6366f1; color: white; border: none; padding: 16px; border-radius: 12px; font-family: 'Manrope', sans-serif; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px;">
-            Заказать генерацию
-        </button>
-    </form>
-</section>
-
-<script>
-    const range = document.getElementById('durationRange');
-    const displayDur = document.getElementById('displayDuration');
-    const displayPrice = document.getElementById('totalPrice');
-    const hiddenSec = document.getElementById('hiddenSeconds');
-    const hiddenPrice = document.getElementById('hiddenPrice');
-    const pricePerSec = 60;
-
-    range.addEventListener('input', (e) => {
-        const val = e.target.value;
-        const total = val * pricePerSec;
-        
-        // Обновляем визуально
-        displayDur.innerText = val;
-        displayPrice.innerText = total.toLocaleString('ru-RU');
-        
-        // Обновляем данные для отправки
-        hiddenSec.value = val;
-        hiddenPrice.value = total;
-    });
 </script>
 </body>
 </html>
