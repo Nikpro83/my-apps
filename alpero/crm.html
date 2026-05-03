@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpero CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #7c6af7;
+    --accent2: #4ecdc4;
+    --accent3: #ff6b6b;
+    --accent4: #ffd93d;
+    --text: #e8e8f0;
+    --text2: #8888aa;
+    --text3: #4a4a66;
+    --green: #51cf66;
+    --orange: #ff922b;
+    --blue: #339af0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sync-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .sync-btn:hover { border-color: var(--accent); color: var(--text); }
+  .sync-btn.loading { border-color: var(--accent); color: var(--accent); }
+
+  .sync-icon { font-size: 14px; }
+  .sync-icon.spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+  }
+  .status-dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    gap: 4px;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .nav-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-btn:hover { color: var(--text); background: var(--bg3); }
+  .nav-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  /* MAIN */
+  .main { padding: 32px; max-width: 1400px; margin: 0 auto; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* LOADING STATE */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px;
+    gap: 16px;
+    color: var(--text2);
+  }
+
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* STATS GRID */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--accent); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.purple::before { background: var(--accent); }
+  .stat-card.teal::before { background: var(--accent2); }
+  .stat-card.red::before { background: var(--accent3); }
+  .stat-card.yellow::before { background: var(--accent4); }
+  .stat-card.green::before { background: var(--green); }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* SECTION */
+  .section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-count {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+    background: var(--bg3);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: var(--bg3); }
+
+  .empty-row td {
+    text-align: center;
+    color: var(--text3);
+    padding: 40px;
+    font-size: 13px;
+  }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-gray { background: rgba(136,136,170,0.15); color: var(--text2); }
+  .badge-green { background: rgba(81,207,102,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(255,217,61,0.15); color: var(--accent4); }
+  .badge-orange { background: rgba(255,146,43,0.15); color: var(--orange); }
+  .badge-blue { background: rgba(51,154,240,0.15); color: var(--blue); }
+  .badge-purple { background: rgba(124,106,247,0.15); color: var(--accent); }
+  .badge-red { background: rgba(255,107,107,0.15); color: var(--accent3); }
+  .badge-teal { background: rgba(78,205,196,0.15); color: var(--accent2); }
+
+  /* KANBAN */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .kanban-col {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .kanban-col-header {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kanban-col-sum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .kanban-cards { padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+
+  .kanban-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .kanban-card:hover { border-color: var(--accent); }
+
+  .kanban-card-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .kanban-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .kanban-card-meta span {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .kanban-card-sum {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* MONEY */
+  .money { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .money-positive { color: var(--green); }
+  .money-negative { color: var(--accent3); }
+
+  /* ERROR */
+  .error-banner {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid rgba(255,107,107,0.3);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--accent3);
+  }
+
+  .error-banner.show { display: flex; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .header { padding: 16px; }
+    .nav { padding: 12px 16px; overflow-x: auto; }
+    .main { padding: 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .kanban { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">ALPERO CRM</div>
+  <div class="header-right">
+    <div class="status-dot" id="statusDot"></div>
+    <button class="sync-btn" id="syncBtn" onclick="loadAll()">
+      <span class="sync-icon" id="syncIcon">↻</span>
+      Обновить
+    </button>
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('dashboard', this)">📊 Сводка</button>
+  <button class="nav-btn" onclick="switchTab('clients', this)">👥 Клиенты</button>
+  <button class="nav-btn" onclick="switchTab('funnel', this)">🎯 Воронка</button>
+  <button class="nav-btn" onclick="switchTab('finance', this)">💰 Финансы</button>
+  <button class="nav-btn" onclick="switchTab('content', this)">📱 Контент</button>
+</nav>
+
+<main class="main">
+
+  <div class="error-banner" id="errorBanner">
+    ⚠️ <span id="errorText">Ошибка загрузки данных</span>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="tab-content active" id="tab-dashboard">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card purple">
+        <div class="stat-label">Всего клиентов</div>
+        <div class="stat-value" id="s-clients">—</div>
+        <div class="stat-sub">в базе</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-label">Активных лидов</div>
+        <div class="stat-value" id="s-leads">—</div>
+        <div class="stat-sub">не в архиве</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Сделок в работе</div>
+        <div class="stat-value" id="s-deals">—</div>
+        <div class="stat-sub">активных</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Выручка</div>
+        <div class="stat-value" id="s-revenue">—</div>
+        <div class="stat-sub">всего по сделкам</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Маржа</div>
+        <div class="stat-value" id="s-margin">—</div>
+        <div class="stat-sub">средний %</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🔔 Ближайшие касания</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Клиент</th>
+              <th>Дата</th>
+              <th>Шаг</th>
+              <th>Статус</th>
+            </tr></thead>
+            <tbody id="touchTable"><tr class="empty-row"><td colspan="4">Загрузка...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">💼 Последние сделки</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Название</th>
+              <th>Этап</th>
+              <th>Сумма</th>
+            </tr></thead>
+            <tbody id="recentDeals"><tr class="empty-row"><td colspan="3">Загрузка...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="tab-content" id="tab-clients">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">👥 База клиентов <span class="section-count" id="clientsCount">0</span></div>
+      </div>
+      <div class="filters" id="clientFilters">
+        <button class="filter-btn active" onclick="filterClients('all', this)">Все</button>
+        <button class="filter-btn" onclick="filterClients('Лид', this)">Лид</button>
+        <button class="filter-btn" onclick="filterClients('Тёплый', this)">Тёплый</button>
+        <button class="filter-btn" onclick="filterClients('Переговоры', this)">Переговоры</button>
+        <button class="filter-btn" onclick="filterClients('КП отправлено', this)">КП отправлено</button>
+        <button class="filter-btn" onclick="filterClients('Клиент', this)">Клиент</button>
+        <button class="filter-btn" onclick="filterClients('Архив', this)">Архив</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Имя / Компания</th>
+            <th>Статус</th>
+            <th>Источник</th>
+            <th>Канал</th>
+            <th>Услуга</th>
+            <th>Бюджет</th>
+            <th>Сумма сделок</th>
+            <th>Следующий шаг</th>
+            <th>Касание</th>
+          </tr></thead>
+          <tbody id="clientsTable"><tr class="empty-row"><td colspan="9">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUNNEL -->
+  <div class="tab-content" id="tab-funnel">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">🎯 Воронка продаж</div>
+      </div>
+      <div class="kanban" id="funnelKanban">
+        <div class="loading-state"><div class="loading-spinner"></div><span>Загрузка...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCE -->
+  <div class="tab-content" id="tab-finance">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card green">
+        <div class="stat-label">Общая выручка</div>
+        <div class="stat-value" id="f-revenue">—</div>
+        <div class="stat-sub money">₽</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Себестоимость</div>
+        <div class="stat-value" id="f-cost">—</div>
+        <div class="stat-sub money">₽</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-label">Чистая прибыль</div>
+        <div class="stat-value" id="f-profit">—</div>
+        <div class="stat-sub money">₽</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Средняя маржа</div>
+        <div class="stat-value" id="f-margin">—</div>
+        <div class="stat-sub">%</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">💰 Все сделки <span class="section-count" id="dealsCount">0</span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Сделка</th>
+            <th>Клиент</th>
+            <th>Услуга</th>
+            <th>Этап</th>
+            <th>Сумма</th>
+            <th>Себестоим.</th>
+            <th>Маржа ₽</th>
+            <th>Маржа %</th>
+            <th>Источник</th>
+          </tr></thead>
+          <tbody id="financeTable"><tr class="empty-row"><td colspan="9">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="tab-content" id="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">📱 Контент-план <span class="section-count" id="contentCount">0</span></div>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterContent('all', this)">Все</button>
+        <button class="filter-btn" onclick="filterContent('ВКонтакте', this)">ВКонтакте</button>
+        <button class="filter-btn" onclick="filterContent('Telegram', this)">Telegram</button>
+        <button class="filter-btn" onclick="filterContent('Instagram', this)">Instagram</button>
+        <button class="filter-btn" onclick="filterContent('TikTok', this)">TikTok</button>
+        <button class="filter-btn" onclick="filterContent('YouTube', this)">YouTube</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Название</th>
+            <th>Платформа</th>
+            <th>Тип</th>
+            <th>Статус</th>
+            <th>Дата</th>
+            <th>Охваты план</th>
+            <th>Просмотры</th>
+            <th>Лайки</th>
+            <th>Лиды</th>
+          </tr></thead>
+          <tbody id="contentTable"><tr class="empty-row"><td colspan="9">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const WORKER = 'https://alpero-crm-proxy.bakimbaevamandzol.workers.dev';
+const DB = {
+  clients:  '8d47d53e-a070-482c-835e-d281115bcb6d',
+  deals:    'd837fade-c8f9-4695-b354-5bfed4111de7',
+  content:  'fa86dbe1-bd6b-4df1-89b8-2e0fa981077d',
+  portfolio:'c73f7f74-d90f-49cb-b1c4-b996f3236319'
+};
+
+let DATA = { clients: [], deals: [], content: [] };
+
+// ── UTILS ──────────────────────────────────────────────
+function prop(page, name) {
+  const p = page.properties?.[name];
+  if (!p) return null;
+  switch(p.type) {
+    case 'title': return p.title?.map(t=>t.plain_text).join('') || '';
+    case 'rich_text': return p.rich_text?.map(t=>t.plain_text).join('') || '';
+    case 'select': return p.select?.name || null;
+    case 'multi_select': return p.multi_select?.map(s=>s.name).join(', ') || '';
+    case 'number': return p.number ?? null;
+    case 'date': return p.date?.start || null;
+    case 'checkbox': return p.checkbox;
+    case 'email': return p.email || null;
+    case 'url': return p.url || null;
+    case 'status': return p.status?.name || null;
+    case 'formula': return p.formula?.number ?? p.formula?.string ?? null;
+    case 'rollup': {
+      if (p.rollup?.type === 'number') return p.rollup.number ?? null;
+      if (p.rollup?.type === 'array') return p.rollup.array?.length || 0;
+      return null;
+    }
+    case 'created_time': return p.created_time || null;
+    default: return null;
+  }
+}
+
+function fmt(n) {
+  if (n == null || n === '') return '—';
+  return Number(n).toLocaleString('ru-RU');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('ru-RU', {day:'2-digit',month:'2-digit'});
+}
+
+function statusBadge(s) {
+  if (!s) return '<span class="badge badge-gray">—</span>';
+  const map = {
+    'Лид':'gray','Тёплый':'yellow','Переговоры':'orange',
+    'КП отправлено':'blue','Клиент':'green','Архив':'gray',
+    'В работе':'purple','Сдано':'teal','Оплачено':'green',
+    'Не наш профиль':'red','Не дозвонился':'red','Отложил':'orange',
+    'Not started':'gray','In progress':'blue','Done':'green'
+  };
+  const cls = map[s] || 'gray';
+  return `<span class="badge badge-${cls}">${s}</span>`;
+}
+
+function sourceBadge(s) {
+  if (!s) return '—';
+  const map = {'Авито':'orange','ВКонтакте':'blue','Сарафан':'green',
+    'Контент':'purple','Сайт':'teal','Telegram-канал':'blue','Другое':'gray'};
+  return `<span class="badge badge-${map[s]||'gray'}">${s}</span>`;
+}
+
+function platformBadge(s) {
+  if (!s) return '—';
+  const map = {'ВКонтакте':'blue','Telegram':'blue','Instagram':'purple',
+    'TikTok':'red','YouTube':'red','Авито':'orange'};
+  return `<span class="badge badge-${map[s]||'gray'}">${s}</span>`;
+}
+
+// ── API ────────────────────────────────────────────────
+async function queryDB(dbId, body={}) {
+  const res = await fetch(`${WORKER}/notion/databases/${dbId}/query`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({page_size: 100, ...body})
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.object === 'error') throw new Error(data.message);
+  return data.results || [];
+}
+
+// ── LOAD ALL ───────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('syncBtn');
+  const icon = document.getElementById('syncIcon');
+  const dot = document.getElementById('statusDot');
+  const err = document.getElementById('errorBanner');
+
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+  err.classList.remove('show');
+
+  try {
+    const [clients, deals, content] = await Promise.all([
+      queryDB(DB.clients),
+      queryDB(DB.deals),
+      queryDB(DB.content)
+    ]);
+
+    DATA.clients = clients;
+    DATA.deals = deals;
+    DATA.content = content;
+
+    renderDashboard();
+    renderClients();
+    renderFunnel();
+    renderFinance();
+    renderContent();
+
+    dot.classList.add('online');
+  } catch(e) {
+    console.error(e);
+    err.classList.add('show');
+    document.getElementById('errorText').textContent = 'Ошибка: ' + e.message;
+    dot.classList.remove('online');
+  } finally {
+    btn.classList.remove('loading');
+    icon.classList.remove('spin');
+  }
+}
+
+// ── DASHBOARD ──────────────────────────────────────────
+function renderDashboard() {
+  const clients = DATA.clients;
+  const deals = DATA.deals;
+
+  const activeClients = clients.filter(c => prop(c,'Статус') !== 'Архив');
+  const leads = clients.filter(c => {
+    const s = prop(c,'Статус');
+    return s && s !== 'Клиент' && s !== 'Архив';
+  });
+  const activeDeals = deals.filter(d => {
+    const s = prop(d,'Этап');
+    return s && !['Архив','Не наш профиль','Оплачено','Сдано'].includes(s);
+  });
+
+  const revenues = deals.map(d => prop(d,'Сумма (₽)')||0);
+  const totalRevenue = revenues.reduce((a,b)=>a+b,0);
+
+  const margins = deals
+    .filter(d => prop(d,'Сумма (₽)') > 0)
+    .map(d => {
+      const sum = prop(d,'Сумма (₽)')||0;
+      const cost = prop(d,'Себестоимость (₽)')||0;
+      return sum > 0 ? ((sum-cost)/sum*100) : 0;
+    });
+  const avgMargin = margins.length ? Math.round(margins.reduce((a,b)=>a+b,0)/margins.length) : 0;
+
+  document.getElementById('s-clients').textContent = clients.length;
+  document.getElementById('s-leads').textContent = leads.length;
+  document.getElementById('s-deals').textContent = activeDeals.length;
+  document.getElementById('s-revenue').textContent = totalRevenue > 0 ? fmt(totalRevenue)+'₽' : '0₽';
+  document.getElementById('s-margin').textContent = avgMargin + '%';
+
+  // Ближайшие касания
+  const upcoming = [...clients]
+    .filter(c => prop(c,'Дата следующего касания') && prop(c,'Статус') !== 'Архив')
+    .sort((a,b) => new Date(prop(a,'Дата следующего касания')) - new Date(prop(b,'Дата следующего касания')))
+    .slice(0, 6);
+
+  const touchTb = document.getElementById('touchTable');
+  if (upcoming.length === 0) {
+    touchTb.innerHTML = '<tr class="empty-row"><td colspan="4">Нет запланированных касаний</td></tr>';
+  } else {
+    touchTb.innerHTML = upcoming.map(c => `
+      <tr>
+        <td><strong>${prop(c,'Имя / Компания')||'—'}</strong></td>
+        <td class="money">${fmtDate(prop(c,'Дата следующего касания'))}</td>
+        <td style="color:var(--text2);font-size:12px">${prop(c,'Следующий шаг')||'—'}</td>
+        <td>${statusBadge(prop(c,'Статус'))}</td>
+      </tr>`).join('');
+  }
+
+  // Последние сделки
+  const recent = [...deals]
+    .sort((a,b) => new Date(b.created_time||0) - new Date(a.created_time||0))
+    .slice(0, 6);
+
+  const dealsTb = document.getElementById('recentDeals');
+  if (recent.length === 0) {
+    dealsTb.innerHTML = '<tr class="empty-row"><td colspan="3">Нет сделок</td></tr>';
+  } else {
+    dealsTb.innerHTML = recent.map(d => `
+      <tr>
+        <td><strong>${prop(d,'Название')||'—'}</strong></td>
+        <td>${statusBadge(prop(d,'Этап'))}</td>
+        <td class="money money-positive">${prop(d,'Сумма (₽)') ? fmt(prop(d,'Сумма (₽)'))+'₽' : '—'}</td>
+      </tr>`).join('');
+  }
+}
+
+// ── CLIENTS ────────────────────────────────────────────
+let clientFilter = 'all';
+
+function filterClients(val, btn) {
+  clientFilter = val;
+  document.querySelectorAll('#tab-clients .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderClients();
+}
+
+function renderClients() {
+  const clients = DATA.clients;
+  const filtered = clientFilter === 'all'
+    ? clients
+    : clients.filter(c => prop(c,'Статус') === clientFilter);
+
+  document.getElementById('clientsCount').textContent = filtered.length;
+
+  const tb = document.getElementById('clientsTable');
+  if (filtered.length === 0) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="9">Нет клиентов</td></tr>';
+    return;
+  }
+
+  tb.innerHTML = filtered.map(c => {
+    const sum = prop(c,'Сумма сделок (₽)');
+    const budget = prop(c,'Бюджет (₽)');
+    return `<tr>
+      <td><strong>${prop(c,'Имя / Компания')||'—'}</strong><br>
+        <span style="font-size:11px;color:var(--text2)">${prop(c,'Telegram / Телефон')||''}</span>
+      </td>
+      <td>${statusBadge(prop(c,'Статус'))}</td>
+      <td>${sourceBadge(prop(c,'Источник'))}</td>
+      <td><span class="badge badge-gray">${prop(c,'Канал связи')||'—'}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${prop(c,'Услуга')||'—'}</td>
+      <td class="money">${budget ? fmt(budget)+'₽' : '—'}</td>
+      <td class="money money-positive">${sum ? fmt(sum)+'₽' : '—'}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:160px">${prop(c,'Следующий шаг')||'—'}</td>
+      <td class="money">${fmtDate(prop(c,'Дата следующего касания'))}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── FUNNEL ─────────────────────────────────────────────
+function renderFunnel() {
+  const deals = DATA.deals;
+  const stages = ['Лид','Тёплый','Переговоры','КП отправлено','В работе','Сдано','Оплачено','Отложил','Архив'];
+  const colors = {
+    'Лид':'var(--text3)','Тёплый':'var(--accent4)','Переговоры':'var(--orange)',
+    'КП отправлено':'var(--blue)','В работе':'var(--accent)',
+    'Сдано':'var(--accent2)','Оплачено':'var(--green)',
+    'Отложил':'var(--orange)','Архив':'var(--text3)'
+  };
+
+  const kanban = document.getElementById('funnelKanban');
+
+  const grouped = {};
+  stages.forEach(s => grouped[s] = []);
+  deals.forEach(d => {
+    const stage = prop(d,'Этап');
+    if (stage && grouped[stage]) grouped[stage].push(d);
+    else if (!stage) grouped['Лид'].push(d);
+  });
+
+  kanban.innerHTML = stages.map(stage => {
+    const cards = grouped[stage] || [];
+    const total = cards.reduce((s,d) => s+(prop(d,'Сумма (₽)')||0), 0);
+    return `
+      <div class="kanban-col">
+        <div class="kanban-col-header" style="color:${colors[stage]||'var(--text2)'}">
+          ${stage}
+          <span class="kanban-col-sum">${cards.length} · ${total>0?fmt(total)+'₽':''}</span>
+        </div>
+        <div class="kanban-cards">
+          ${cards.length === 0
+            ? '<div style="color:var(--text3);font-size:11px;text-align:center;padding:8px">пусто</div>'
+            : cards.map(d => `
+              <div class="kanban-card">
+                <div class="kanban-card-title">${prop(d,'Название')||'—'}</div>
+                <div class="kanban-card-meta">
+                  <span>${prop(d,'Услуга')||'—'}</span>
+                  ${prop(d,'Сумма (₽)') ? `<span class="kanban-card-sum">${fmt(prop(d,'Сумма (₽)'))}₽</span>` : ''}
+                  ${prop(d,'Дата закрытия') ? `<span>до ${fmtDate(prop(d,'Дата закрытия'))}</span>` : ''}
+                </div>
+              </div>`).join('')
+          }
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── FINANCE ────────────────────────────────────────────
+function renderFinance() {
+  const deals = DATA.deals;
+
+  const totalRev = deals.reduce((s,d) => s+(prop(d,'Сумма (₽)')||0), 0);
+  const totalCost = deals.reduce((s,d) => s+(prop(d,'Себестоимость (₽)')||0), 0);
+  const totalProfit = totalRev - totalCost;
+  const margins = deals.filter(d=>prop(d,'Сумма (₽)')>0)
+    .map(d => { const s=prop(d,'Сумма (₽)')||0; const c=prop(d,'Себестоимость (₽)')||0; return s>0?(s-c)/s*100:0; });
+  const avgM = margins.length ? Math.round(margins.reduce((a,b)=>a+b,0)/margins.length) : 0;
+
+  document.getElementById('f-revenue').textContent = fmt(totalRev) + '₽';
+  document.getElementById('f-cost').textContent = fmt(totalCost) + '₽';
+  document.getElementById('f-profit').textContent = fmt(totalProfit) + '₽';
+  document.getElementById('f-margin').textContent = avgM + '%';
+  document.getElementById('dealsCount').textContent = deals.length;
+
+  const tb = document.getElementById('financeTable');
+  if (deals.length === 0) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="9">Нет сделок</td></tr>';
+    return;
+  }
+
+  const sorted = [...deals].sort((a,b) => new Date(b.created_time||0)-new Date(a.created_time||0));
+
+  tb.innerHTML = sorted.map(d => {
+    const sum = prop(d,'Сумма (₽)') || 0;
+    const cost = prop(d,'Себестоимость (₽)') || 0;
+    const margin = sum - cost;
+    const marginPct = sum > 0 ? Math.round(margin/sum*100) : 0;
+    return `<tr>
+      <td><strong>${prop(d,'Название')||'—'}</strong></td>
+      <td style="font-size:12px;color:var(--text2)">${prop(d,'Клиент')||'—'}</td>
+      <td style="font-size:12px">${prop(d,'Услуга')||'—'}</td>
+      <td>${statusBadge(prop(d,'Этап'))}</td>
+      <td class="money money-positive">${sum ? fmt(sum)+'₽' : '—'}</td>
+      <td class="money" style="color:var(--accent3)">${cost ? fmt(cost)+'₽' : '—'}</td>
+      <td class="money ${margin>=0?'money-positive':'money-negative'}">${sum ? fmt(margin)+'₽' : '—'}</td>
+      <td class="money ${marginPct>=50?'money-positive':marginPct>=0?'':'money-negative'}">${sum ? marginPct+'%' : '—'}</td>
+      <td>${sourceBadge(prop(d,'Источник'))}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── CONTENT ────────────────────────────────────────────
+let contentFilter = 'all';
+
+function filterContent(val, btn) {
+  contentFilter = val;
+  document.querySelectorAll('#tab-content .filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderContent();
+}
+
+function renderContent() {
+  const items = DATA.content;
+  const filtered = contentFilter === 'all'
+    ? items
+    : items.filter(c => prop(c,'Платформа') === contentFilter);
+
+  document.getElementById('contentCount').textContent = filtered.length;
+
+  const tb = document.getElementById('contentTable');
+  if (filtered.length === 0) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="9">Нет публикаций</td></tr>';
+    return;
+  }
+
+  const sorted = [...filtered].sort((a,b) => {
+    const da = prop(a,'Дата публикации') || '0';
+    const db2 = prop(b,'Дата публикации') || '0';
+    return db2.localeCompare(da);
+  });
+
+  tb.innerHTML = sorted.map(c => `<tr>
+    <td><strong>${prop(c,'Название')||'—'}</strong></td>
+    <td>${platformBadge(prop(c,'Платформа'))}</td>
+    <td><span class="badge badge-gray">${prop(c,'Тип')||'—'}</span></td>
+    <td>${statusBadge(prop(c,'Статус'))}</td>
+    <td class="money">${fmtDate(prop(c,'Дата публикации'))}</td>
+    <td class="money">${prop(c,'Плановые охваты') ? fmt(prop(c,'Плановые охваты')) : '—'}</td>
+    <td class="money money-positive">${prop(c,'Факт просмотры') ? fmt(prop(c,'Факт просмотры')) : '—'}</td>
+    <td class="money">${prop(c,'Факт лайки') ? fmt(prop(c,'Факт лайки')) : '—'}</td>
+    <td class="money ${prop(c,'Лиды с поста')>0?'money-positive':''}">${prop(c,'Лиды с поста') ? prop(c,'Лиды с поста') : '—'}</td>
+  </tr>`).join('');
+}
+
+// ── TABS ───────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── INIT ───────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
